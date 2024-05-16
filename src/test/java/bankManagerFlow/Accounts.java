@@ -1,8 +1,15 @@
 package bankManagerFlow;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
 public class Accounts {
 
-    public Integer accountId;
-    public String currency;
+    public Integer customerId;
+    public List<String> currency;
 
 }

@@ -1,13 +1,6 @@
 package tests;
 
-
-import bankManagerFlow.Accounts;
-import bankManagerFlow.BankManager;
-import bankManagerFlow.Customer;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -20,7 +13,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BankManagerTest {
+public class BankManagerTestOriginal {
     public WebDriver webDriver;
 
     @Test
@@ -29,27 +22,16 @@ public class BankManagerTest {
         webDriver = new ChromeDriver();
         webDriver.manage().window().maximize();
         webDriver.get("https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login");
-
         WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
         PropertyUtility propertyUtility = new PropertyUtility("AddCustomerDataA");
 
-        BankManager bankManagerTT = new BankManager();
-        Customer customer = new Customer();
-
-        customer.setFirstName(propertyUtility.getAllData().get("firstNameValue"));
-        customer.setLastName(propertyUtility.getAllData().get("lastNameValue"));
-        customer.setPostCode(propertyUtility.getAllData().get("postCodeValue"));
-
-        bankManagerTT.getCustomers().add(customer);
-
         //chemam datele din properties
-        String firstNameValue = bankManagerTT.getCustomers().get(0).getFirstName();
-        String lastNameValue = bankManagerTT.getCustomers().get(0).getLastName();
-        String postCodeValue = bankManagerTT.getCustomers().get(0).getPostCode();
+        String firstNameValue = propertyUtility.getAllData().get("firstNameValue");
+        String lastNameValue = propertyUtility.getAllData().get("lastNameValue");
+        String postCodeValue = propertyUtility.getAllData().get("postCodeValue");
 
         //datele salvate pe parcurs
         List<String> requestedCurrencyList = List.of(propertyUtility.getAllData().get("accountCurrencies").split(","));
-        List<String> accountsCurrencyCreated = new ArrayList<>();
 
         //accesam pagina bank manager
         WebElement bankManagerPage = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Bank Manager Login']")));
@@ -73,7 +55,6 @@ public class BankManagerTest {
         Alert alert = webDriver.switchTo().alert();
         String alertText = alert.getText();
         int accountID = Integer.parseInt(alertText.split(":")[1].trim());
-        //customer.setCustomerId(Integer.parseInt(alertText.split(":")[1].trim()));
         alert.accept();
 
         //accesam pagina open account
@@ -84,9 +65,9 @@ public class BankManagerTest {
         WebElement currencyDropdown = wait.until(ExpectedConditions.elementToBeClickable(By.id("currency")));
         WebElement pressProcess = webDriver.findElement(By.xpath("//button[text()='Process']"));
         List<WebElement> findUserByID = webDriver.findElements(By.xpath("//*[@id='userSelect']/option"));
-
         Select select = new Select(currencyDropdown);
         List<WebElement> selectCurrency = select.getOptions();
+        List<String> accountsCurrencyCreated = new ArrayList<>();
 
         //creem o functie care parcurge lista din properties si selecteaza valuta corespunzatoare cu cea de pe site
         for (String currency : requestedCurrencyList) {
@@ -104,11 +85,6 @@ public class BankManagerTest {
             }
         }
 
-//        Accounts account = new Accounts();
-//        account.setCurrency(accountsCurrencyCreated);
-//        account.setCustomerId(customer.getCustomerId());
-//        bankManagerTT.getCustomers().get(0).getAccounts().add(account);
-
         //accesam pagina Customers
         WebElement customersList = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@ng-click='showCust()']")));
         customersList.click();
@@ -122,7 +98,8 @@ public class BankManagerTest {
 
         //verificam conturile create din lista si conturile online dupa care stergem userul
         for (int i = 0; i < lastNameList.size(); i++) {
-            if (firstNameList.get(i).getText().trim().equals(firstNameValue)) {
+            if (firstNameList.get(i).getText().trim().equals(firstNameValue) && lastNameList.get(i).getText().trim().equals(lastNameValue) &&
+                    postCodeList.get(i).getText().trim().equals(postCodeValue)) {
 
                 Assert.assertEquals(firstNameList.get(i).getText().trim(), firstNameValue);
                 Assert.assertEquals(lastNameList.get(i).getText().trim(), lastNameValue);
@@ -136,12 +113,9 @@ public class BankManagerTest {
                 Assert.assertEquals(accountsWebList.get(i).getText().trim(), result);
 
                 deleteList.get(i).click();
-
+                System.out.println(deleteList.get(i).getAccessibleName());
             }
-            System.out.println(deleteList.get(i).getText());
-            System.out.println("lalala");
         }
-
         //inchide driverul
         //webDriver.quit();
     }
